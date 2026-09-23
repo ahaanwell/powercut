@@ -86,16 +86,6 @@ async function getStateDetail(req, res, next) {
       return res.status(404).json({ message: "Unknown state" });
     }
 
-    const reports = await Report.find({ state }).sort({ createdAt: -1 }).limit(100);
-
-    const pincodeCounts = await Report.aggregate([
-      { $match: { state, status: { $in: ["reported", "ongoing"] } } },
-      { $group: { _id: "$pincode", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 20 },
-      { $project: { _id: 0, pincode: "$_id", count: 1 } },
-    ]);
-
     // Districts and their real areas/pincodes come from the bundled India
     // Post directory — complete and instant, no live scanning needed. The
     // district list is deliberately drawn from this data's own keys (postal
@@ -108,10 +98,17 @@ async function getStateDetail(req, res, next) {
     // produce districts that can never have real data behind them.
     const stateDirectory = PINCODE_DIRECTORY[state] || {};
 
-    const activeReports = await Report.find(
-      { state, status: { $in: ["reported", "ongoing"] } },
-      { pincode: 1, area: 1 }
-    );
+    const [reports, pincodeCounts, activeReports] = await Promise.all([
+      Report.find({ state }).sort({ createdAt: -1 }).limit(100),
+      Report.aggregate([
+        { $match: { state, status: { $in: ["reported", "ongoing"] } } },
+        { $group: { _id: "$pincode", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 20 },
+        { $project: { _id: 0, pincode: "$_id", count: 1 } },
+      ]),
+      Report.find({ state, status: { $in: ["reported", "ongoing"] } }, { pincode: 1, area: 1 }),
+    ]);
     const activeKeys = new Set(
       activeReports.filter((r) => r.area).map((r) => `${r.pincode}|${r.area.trim().toLowerCase()}`)
     );
@@ -162,18 +159,17 @@ async function getStateDistrictDetail(req, res, next) {
     const areas = await withActiveStatus(rawAreas);
     const pincodes = [...new Set(areas.map((a) => a.pincode))];
 
-    const reports = pincodes.length
-      ? await Report.find({ state, pincode: { $in: pincodes } }).sort({ createdAt: -1 }).limit(100)
-      : [];
-
-    const pincodeCounts = pincodes.length
-      ? await Report.aggregate([
-          { $match: { state, pincode: { $in: pincodes }, status: { $in: ["reported", "ongoing"] } } },
-          { $group: { _id: "$pincode", count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
-          { $project: { _id: 0, pincode: "$_id", count: 1 } },
+    const [reports, pincodeCounts] = pincodes.length
+      ? await Promise.all([
+          Report.find({ state, pincode: { $in: pincodes } }).sort({ createdAt: -1 }).limit(100),
+          Report.aggregate([
+            { $match: { state, pincode: { $in: pincodes }, status: { $in: ["reported", "ongoing"] } } },
+            { $group: { _id: "$pincode", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $project: { _id: 0, pincode: "$_id", count: 1 } },
+          ]),
         ])
-      : [];
+      : [[], []];
 
     const activeAreas = areas.filter((a) => a.active).length;
 

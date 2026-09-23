@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getPincodeGeocode, getPincodeLocalities, getPincodeStatus } from "@/lib/api";
+import type { ReportStatus } from "@/lib/types";
 import { isValidPincode } from "@/lib/pincode";
 import { timeAgo } from "@/lib/timeAgo";
 import { slugify } from "@/lib/slugify";
@@ -66,16 +68,58 @@ function countRecentReports(reports: { createdAt: string }[], hours: number): nu
   return reports.filter((r) => new Date(r.createdAt).getTime() >= since).length;
 }
 
+// Geocoding goes through Nominatim, which the backend serializes to ~1
+// request/second across the whole app (its usage policy) — on a busy
+// backend that queue can back up behind unrelated requests (e.g. the live
+// grid map warming up). Fetching it here, in its own Suspense boundary,
+// means a slow/queued geocode never blocks the rest of the page from
+// rendering immediately.
+async function PincodeMapSection({
+  pincode,
+  locality,
+  status,
+  reportCount24h,
+  lastReportedAt,
+}: {
+  pincode: string;
+  locality: string;
+  status: ReportStatus | "no-recent-reports";
+  reportCount24h: number;
+  lastReportedAt: string | null;
+}) {
+  const geocode = await getPincodeGeocode(pincode).catch(() => ({ lat: null, lng: null }));
+  return (
+    <PincodeMap
+      pincode={pincode}
+      locality={locality}
+      status={status}
+      reportCount24h={reportCount24h}
+      lastReportedAt={lastReportedAt}
+      lat={geocode.lat}
+      lng={geocode.lng}
+    />
+  );
+}
+
+const MAP_SKELETON = (
+  <div className="flex h-80 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-sm text-zinc-500">
+    Loading map&hellip;
+  </div>
+);
+
+const CARD_SKELETON = (
+  <div className="h-40 animate-pulse rounded-2xl border border-zinc-200 bg-white shadow-sm" />
+);
+
 export default async function PincodeStatusPage({ params }: Props) {
   const { code } = await params;
   if (!isValidPincode(code)) {
     notFound();
   }
 
-  const [data, localitiesRes, geocode] = await Promise.all([
+  const [data, localitiesRes] = await Promise.all([
     getPincodeStatus(code).catch(() => null),
     getPincodeLocalities(code).catch(() => ({ localities: [] })),
-    getPincodeGeocode(code).catch(() => ({ lat: null, lng: null })),
   ]);
   if (!data) {
     notFound();
@@ -177,15 +221,15 @@ export default async function PincodeStatusPage({ params }: Props) {
             </div>
           </div>
 
-          <PincodeMap
-            pincode={data.pincode}
-            locality={primaryLocality}
-            status={data.currentStatus}
-            reportCount24h={reportCount24h}
-            lastReportedAt={data.lastReportedAt}
-            lat={geocode.lat}
-            lng={geocode.lng}
-          />
+          <Suspense fallback={MAP_SKELETON}>
+            <PincodeMapSection
+              pincode={data.pincode}
+              locality={primaryLocality}
+              status={data.currentStatus}
+              reportCount24h={reportCount24h}
+              lastReportedAt={data.lastReportedAt}
+            />
+          </Suspense>
 
           <div>
             <h2 className="text-lg font-bold text-zinc-900">Recent Reports in this Area</h2>
@@ -204,13 +248,25 @@ export default async function PincodeStatusPage({ params }: Props) {
         </div>
 
         <div className="space-y-4 lg:col-span-2">
-          <NearbyPincodesCard pincode={data.pincode} state={data.state} />
-          <PincodeScoreCard pincode={data.pincode} areaLabel={primaryLocality || data.pincode} />
-          <PincodeStatTiles pincode={data.pincode} />
-          <DiscomScheduleCard pincode={data.pincode} />
-          <OutageTrendChart pincode={data.pincode} />
+          <Suspense fallback={CARD_SKELETON}>
+            <NearbyPincodesCard pincode={data.pincode} state={data.state} />
+          </Suspense>
+          <Suspense fallback={CARD_SKELETON}>
+            <PincodeScoreCard pincode={data.pincode} areaLabel={primaryLocality || data.pincode} />
+          </Suspense>
+          <Suspense fallback={CARD_SKELETON}>
+            <PincodeStatTiles pincode={data.pincode} />
+          </Suspense>
+          <Suspense fallback={CARD_SKELETON}>
+            <DiscomScheduleCard pincode={data.pincode} />
+          </Suspense>
+          <Suspense fallback={CARD_SKELETON}>
+            <OutageTrendChart pincode={data.pincode} />
+          </Suspense>
           <NotifyMeButton pincode={data.pincode} />
-          <NeighborhoodComments pincode={data.pincode} />
+          <Suspense fallback={CARD_SKELETON}>
+            <NeighborhoodComments pincode={data.pincode} />
+          </Suspense>
         </div>
       </div>
 

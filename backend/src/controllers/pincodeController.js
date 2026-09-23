@@ -225,15 +225,19 @@ async function getReverseGeocode(req, res) {
 }
 
 const GRID_CACHE_TTL_MS = 5 * 60 * 1000;
-const GRID_PINCODE_LIMIT = 60;
+// Kept small deliberately: each new (uncached) pincode here costs ~1.1s on
+// the shared, globally-serialized Nominatim queue (see scheduleNominatim
+// above) — that queue is shared by every geocode/reverse-geocode call in
+// the app, including individual pincode pages' maps. A large batch here
+// can starve those other, much smaller requests for a minute or more.
+const GRID_PINCODE_LIMIT = 20;
 let gridCache = null;
+let gridRefreshInFlight = null;
 
-async function getGridStatus(req, res, next) {
-  try {
-    if (gridCache && gridCache.expiresAt > Date.now()) {
-      return res.json(gridCache.data);
-    }
+async function refreshGridCache() {
+  if (gridRefreshInFlight) return gridRefreshInFlight;
 
+  gridRefreshInFlight = (async () => {
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const grouped = await Report.aggregate([
       { $match: { createdAt: { $gte: since } } },
@@ -267,6 +271,31 @@ async function getGridStatus(req, res, next) {
 
     const payload = { points, generatedAt: new Date().toISOString() };
     gridCache = { data: payload, expiresAt: Date.now() + GRID_CACHE_TTL_MS };
+    return payload;
+  })();
+
+  try {
+    return await gridRefreshInFlight;
+  } finally {
+    gridRefreshInFlight = null;
+  }
+}
+
+async function getGridStatus(req, res, next) {
+  try {
+    // Stale-while-revalidate: a live request always gets whatever's in the
+    // cache immediately (even if slightly stale) rather than waiting behind
+    // the Nominatim queue — a background refresh (also started at server
+    // startup and on a timer, see server.js) keeps it current without ever
+    // making a user's request pay for it.
+    if (gridCache) {
+      if (gridCache.expiresAt <= Date.now()) {
+        refreshGridCache().catch((err) => console.error("Grid cache refresh failed:", err.message));
+      }
+      return res.json(gridCache.data);
+    }
+
+    const payload = await refreshGridCache();
     res.json(payload);
   } catch (err) {
     next(err);
@@ -281,4 +310,5 @@ module.exports = {
   getGridStatus,
   getAllPincodes,
   fetchLocalities,
+  refreshGridCache,
 };
