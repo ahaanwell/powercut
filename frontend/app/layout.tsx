@@ -7,6 +7,7 @@ import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import RestoreTextSize from "@/components/RestoreTextSize";
+import NavigationProgress from "@/components/NavigationProgress";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -96,6 +97,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <RestoreTextSize />
         <Header />
         <Suspense fallback={<div className="h-6 bg-blue-950" />}>
