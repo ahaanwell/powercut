@@ -4,6 +4,7 @@ import { getDistrictDetail } from "@/lib/api";
 import { buildBreadcrumbJsonLd } from "@/lib/breadcrumbs";
 import DistrictAreaGrid from "@/components/DistrictAreaGrid";
 import ShareButtons from "@/components/ShareButtons";
+import DistrictDetailContent from "@/components/DistrictDetailContent";
 import { BoltIcon } from "@/components/icons";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -61,6 +62,15 @@ export default async function DistrictPage({ params }: Props) {
       <ShareButtons
         url={`${SITE_URL}/district/${slug}`}
         text={`Power cut status for ${data.district}`}
+      />
+
+      <DistrictDetailContent
+        district={data.district}
+        state={data.state}
+        totalAreas={data.totalAreas}
+        activeAreas={data.activeAreas}
+        backHref="/states"
+        backLabel="browse every state PowerCut tracks"
       />
     </div>
   );

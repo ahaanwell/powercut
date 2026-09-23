@@ -21,8 +21,7 @@ const DISTRICTS = {
   ahmedabad: { name: "Ahmedabad", state: "Gujarat", filterDistrict: "Ahmedabad", prefixes: ["380"] },
 };
 
-const SCAN_FROM = 1;
-const SCAN_TO = 150;
+const SCAN_SAMPLE_SIZE = 150;
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const areasCache = new Map();
@@ -38,8 +37,7 @@ async function getDistrictAreas(slug) {
 
   const areas = await scanAreas({
     prefixes: config.prefixes,
-    from: SCAN_FROM,
-    to: SCAN_TO,
+    sampleSize: SCAN_SAMPLE_SIZE,
     filterDistrict: config.filterDistrict,
   });
   areasCache.set(slug, { data: areas, expiresAt: Date.now() + CACHE_TTL_MS });

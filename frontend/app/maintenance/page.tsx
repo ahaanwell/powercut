@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getUpcomingMaintenance } from "@/lib/api";
+import { slugify } from "@/lib/slugify";
 import MaintenancePageContent from "@/components/MaintenancePageContent";
 import { CalendarIcon, CheckCircleIcon, ShieldIcon, ClockIcon } from "@/components/icons";
 
@@ -85,7 +86,7 @@ export default async function MaintenancePage({ searchParams }: Props) {
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <Link
-                            href={`/pincode/${item.pincode}`}
+                            href={`/pincode/${item.pincode}${item.area ? `/${slugify(item.area)}` : ""}`}
                             className="font-semibold text-zinc-900 hover:underline"
                           >
                             {item.pincode} {item.area ? `— ${item.area}` : ""}

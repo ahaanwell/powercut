@@ -1,7 +1,26 @@
 const Report = require("../models/Report");
+const PINCODE_DIRECTORY = require("../data/pincodeDirectory.json");
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const cache = new Map();
+
+let allPincodesCache = null;
+function getAllPincodes(req, res) {
+  if (!allPincodesCache) {
+    const map = new Map();
+    for (const districts of Object.values(PINCODE_DIRECTORY)) {
+      for (const areas of Object.values(districts)) {
+        for (const a of areas) {
+          if (!map.has(a.pincode)) map.set(a.pincode, a.name);
+        }
+      }
+    }
+    allPincodesCache = [...map.entries()]
+      .map(([pincode, area]) => ({ pincode, area }))
+      .sort((a, b) => a.pincode.localeCompare(b.pincode));
+  }
+  res.json({ pincodes: allPincodesCache });
+}
 
 async function fetchLocalities(pincode) {
   const cached = cache.get(pincode);
@@ -147,6 +166,64 @@ async function getGeocode(req, res) {
   res.json(coords || { lat: null, lng: null });
 }
 
+const REVERSE_GEOCODE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const reverseGeocodeCache = new Map();
+
+async function fetchReverseGeocode(lat, lng) {
+  const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+  const cached = reverseGeocodeCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
+  const result = await scheduleNominatim(async () => {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`,
+        {
+          signal: controller.signal,
+          headers: { "User-Agent": "PowerCutTracker/1.0 (Node.js server)" },
+        }
+      );
+      clearTimeout(timeout);
+      if (!response.ok) return null;
+      const data = await response.json();
+      const address = data?.address;
+      if (!address || data.error) return null;
+      const postcode = (address.postcode || "").trim();
+      if (!/^[1-9][0-9]{5}$/.test(postcode)) return null;
+      return {
+        pincode: postcode,
+        area:
+          address.suburb || address.neighbourhood || address.village || address.town || address.city_district || "",
+        district: address.state_district || address.county || address.city || "",
+        state: address.state || "",
+      };
+    } catch {
+      return null;
+    }
+  });
+
+  reverseGeocodeCache.set(key, { data: result, expiresAt: Date.now() + REVERSE_GEOCODE_TTL_MS });
+  return result;
+}
+
+async function getReverseGeocode(req, res) {
+  const lat = Number(req.query.lat);
+  const lng = Number(req.query.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return res.status(400).json({ message: "Invalid coordinates" });
+  }
+
+  const result = await fetchReverseGeocode(lat, lng);
+  if (!result) {
+    return res.status(404).json({ message: "Could not resolve a PIN code for this location" });
+  }
+  res.json(result);
+}
+
 const GRID_CACHE_TTL_MS = 5 * 60 * 1000;
 const GRID_PINCODE_LIMIT = 60;
 let gridCache = null;
@@ -196,4 +273,12 @@ async function getGridStatus(req, res, next) {
   }
 }
 
-module.exports = { getLocalities, getNearby, getGeocode, getGridStatus, fetchLocalities };
+module.exports = {
+  getLocalities,
+  getNearby,
+  getGeocode,
+  getReverseGeocode,
+  getGridStatus,
+  getAllPincodes,
+  fetchLocalities,
+};

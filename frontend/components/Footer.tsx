@@ -63,10 +63,7 @@ export default function Footer() {
         ))}
       </div>
       <div className="border-t border-blue-900 px-4 py-4 text-center text-xs text-blue-300 sm:px-6">
-        PowerCut is an independent, community-driven service. It is not affiliated with,
-        endorsed by, or operated by any government agency, DISCOM, or electricity provider.
-        Reports may be incomplete, delayed, or inaccurate. &copy; {new Date().getFullYear()}{" "}
-        PowerCut. Last updated {new Date().toLocaleDateString("en-IN")}.
+        &copy; {new Date().getFullYear()} PowerCut &mdash; Community Outage Tracking
       </div>
     </footer>
   );

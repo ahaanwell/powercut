@@ -1,8 +1,13 @@
 const Report = require("../models/Report");
-const { PREFIX_STATE_MAP, getPrefixesForState } = require("../utils/pincodeState");
+const { PREFIX_STATE_MAP } = require("../utils/pincodeState");
 const { CITY_PREFIXES, pincodeRegexForCity } = require("../utils/cityPincodes");
 const { scanAreas, withActiveStatus } = require("../utils/areaScan");
 const slugify = require("../utils/slugify");
+// The full India Post PIN code directory (~148k post offices), bundled so
+// state/district area listings are instant and complete instead of relying
+// on live, best-effort pincode guessing (see utils/areaScan.js, still used
+// for the separate city-based district pages below).
+const PINCODE_DIRECTORY = require("../data/pincodeDirectory.json");
 
 function resolveBySlug(names, slug) {
   return names.find((name) => slugify(name) === slug) || null;
@@ -10,16 +15,13 @@ function resolveBySlug(names, slug) {
 
 const AREA_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const cityAreasCache = new Map();
-const stateAreasCache = new Map();
-const CITY_SCAN_RANGE = { from: 1, to: 150 };
-const STATE_SCAN_RANGE = { from: 1, to: 60 };
-
-async function getCachedAreas(cache, key, prefixes, range) {
+const CITY_SAMPLE_SIZE = 150;
+async function getCachedAreas(cache, key, prefixes, sampleSize) {
   const cached = cache.get(key);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.data;
   }
-  const areas = await scanAreas({ prefixes, from: range.from, to: range.to });
+  const areas = await scanAreas({ prefixes, sampleSize });
   cache.set(key, { data: areas, expiresAt: Date.now() + AREA_CACHE_TTL_MS });
   return areas;
 }
@@ -94,11 +96,98 @@ async function getStateDetail(req, res, next) {
       { $project: { _id: 0, pincode: "$_id", count: 1 } },
     ]);
 
-    const prefixes = getPrefixesForState(state);
-    const rawAreas = await getCachedAreas(stateAreasCache, slug, prefixes, STATE_SCAN_RANGE);
-    const areas = await withActiveStatus(rawAreas);
+    // Districts and their real areas/pincodes come from the bundled India
+    // Post directory — complete and instant, no live scanning needed. The
+    // district list is deliberately drawn from this data's own keys (postal
+    // sorting districts) rather than an external administrative-district
+    // reference: PIN codes encode postal districts, which routinely diverge
+    // from — and lag behind — a state's official admin/revenue districts
+    // (e.g. India Post still files Delhi's "South East Delhi" area under the
+    // older "South Delhi" postal district, and Karnataka's under "Bangalore"
+    // rather than "Bengaluru Urban"). Listing admin-district names here would
+    // produce districts that can never have real data behind them.
+    const stateDirectory = PINCODE_DIRECTORY[state] || {};
 
-    res.json({ state, slug, reports, pincodeCounts, areas });
+    const activeReports = await Report.find(
+      { state, status: { $in: ["reported", "ongoing"] } },
+      { pincode: 1, area: 1 }
+    );
+    const activeKeys = new Set(
+      activeReports.filter((r) => r.area).map((r) => `${r.pincode}|${r.area.trim().toLowerCase()}`)
+    );
+
+    let areaCount = 0;
+    const districts = Object.entries(stateDirectory).map(([district, districtAreas]) => {
+      const pincodes = new Set();
+      let activeCount = 0;
+      for (const a of districtAreas) {
+        pincodes.add(a.pincode);
+        if (activeKeys.has(`${a.pincode}|${a.name.toLowerCase()}`)) activeCount += 1;
+      }
+      areaCount += districtAreas.length;
+      return {
+        name: district,
+        slug: slugify(district),
+        pincodeCount: pincodes.size,
+        activeCount,
+      };
+    });
+    districts.sort((a, b) => a.name.localeCompare(b.name));
+
+    res.json({ state, slug, reports, pincodeCounts, districts, areaCount });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getStateDistrictDetail(req, res, next) {
+  try {
+    const { slug, districtSlug } = req.params;
+    const allStates = [...new Set(Object.values(PREFIX_STATE_MAP))];
+    const state = resolveBySlug(allStates, slug);
+    if (!state) {
+      return res.status(404).json({ message: "Unknown state" });
+    }
+
+    const stateDirectory = PINCODE_DIRECTORY[state] || {};
+    const districtNameMatch = Object.keys(stateDirectory).find(
+      (name) => slugify(name) === districtSlug
+    );
+    if (!districtNameMatch) {
+      return res.status(404).json({ message: "Unknown district" });
+    }
+
+    const district = districtNameMatch;
+    const rawAreas = stateDirectory[districtNameMatch].map((a) => ({ ...a, district }));
+    const areas = await withActiveStatus(rawAreas);
+    const pincodes = [...new Set(areas.map((a) => a.pincode))];
+
+    const reports = pincodes.length
+      ? await Report.find({ state, pincode: { $in: pincodes } }).sort({ createdAt: -1 }).limit(100)
+      : [];
+
+    const pincodeCounts = pincodes.length
+      ? await Report.aggregate([
+          { $match: { state, pincode: { $in: pincodes }, status: { $in: ["reported", "ongoing"] } } },
+          { $group: { _id: "$pincode", count: { $sum: 1 } } },
+          { $sort: { count: -1 } },
+          { $project: { _id: 0, pincode: "$_id", count: 1 } },
+        ])
+      : [];
+
+    const activeAreas = areas.filter((a) => a.active).length;
+
+    res.json({
+      state,
+      stateSlug: slug,
+      district,
+      districtSlug,
+      totalAreas: areas.length,
+      activeAreas,
+      reports,
+      pincodeCounts,
+      areas,
+    });
   } catch (err) {
     next(err);
   }
@@ -239,7 +328,7 @@ async function getCityDetail(req, res, next) {
       { $project: { _id: 0, pincode: "$_id", count: 1 } },
     ]);
 
-    const rawAreas = await getCachedAreas(cityAreasCache, slug, CITY_PREFIXES[city], CITY_SCAN_RANGE);
+    const rawAreas = await getCachedAreas(cityAreasCache, slug, CITY_PREFIXES[city], CITY_SAMPLE_SIZE);
     const areas = await withActiveStatus(rawAreas);
 
     res.json({ city, slug, reports, pincodeCounts, areas });
@@ -252,7 +341,7 @@ async function warmCityCache() {
   for (const city of Object.keys(CITY_PREFIXES)) {
     const slug = slugify(city);
     try {
-      await getCachedAreas(cityAreasCache, slug, CITY_PREFIXES[city], CITY_SCAN_RANGE);
+      await getCachedAreas(cityAreasCache, slug, CITY_PREFIXES[city], CITY_SAMPLE_SIZE);
       console.log(`[warm] cached areas for city: ${city}`);
     } catch (err) {
       console.error(`[warm] failed for city ${city}:`, err.message);
@@ -264,6 +353,7 @@ module.exports = {
   getOverallStats,
   listStates,
   getStateDetail,
+  getStateDistrictDetail,
   getPincodeScore,
   getPincodeTrend,
   listCities,

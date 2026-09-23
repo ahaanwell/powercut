@@ -16,9 +16,14 @@ import NotifyMeButton from "@/components/NotifyMeButton";
 import NeighborhoodComments from "@/components/NeighborhoodComments";
 import PincodeMap from "@/components/PincodeMap";
 import QuickReportButtons from "@/components/QuickReportButtons";
+import PincodeDetailContent from "@/components/PincodeDetailContent";
 import { AlertCircleIcon, CheckCircleIcon, PhoneIcon } from "@/components/icons";
 
-type Props = { params: Promise<{ code: string }> };
+// The optional [[...slug]] segment (e.g. /pincode/800001/bank-road) is a
+// cosmetic, SEO-friendly locality suffix only — lookups are always keyed by
+// `code` alone, and the canonical URL always points at the bare /pincode/{code}
+// form regardless of which slug (if any) was used to reach this page.
+type Props = { params: Promise<{ code: string; slug?: string[] }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
@@ -89,6 +94,14 @@ export default async function PincodeStatusPage({ params }: Props) {
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Home", path: "/" },
     { name: data.state, path: `/states/${slugify(data.state)}` },
+    ...(district
+      ? [
+          {
+            name: district,
+            path: `/states/${slugify(data.state)}/district/${slugify(district)}`,
+          },
+        ]
+      : []),
     { name: `PIN Code ${data.pincode}`, path: `/pincode/${data.pincode}` },
   ]);
 
@@ -109,7 +122,12 @@ export default async function PincodeStatusPage({ params }: Props) {
         {district && (
           <>
             <span>/</span>
-            <span>{district}</span>
+            <Link
+              href={`/states/${slugify(data.state)}/district/${slugify(district)}`}
+              className="hover:text-zinc-900"
+            >
+              {district}
+            </Link>
           </>
         )}
         <span>/</span>
@@ -195,6 +213,14 @@ export default async function PincodeStatusPage({ params }: Props) {
           <NeighborhoodComments pincode={data.pincode} />
         </div>
       </div>
+
+      <PincodeDetailContent
+        pincode={data.pincode}
+        place={primaryLocality}
+        district={district}
+        state={data.state}
+        reportCount={data.reports.length}
+      />
     </div>
   );
 }

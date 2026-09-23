@@ -23,7 +23,7 @@ export default async function NearbyPincodesCard({
           {results.map((r) => (
             <Link
               key={r.pincode}
-              href={`/pincode/${r.pincode}`}
+              href={`/pincode/${r.pincode}/${slugify(r.name)}`}
               className="font-medium text-amber-700 hover:underline"
             >
               {r.name} ({r.pincode})

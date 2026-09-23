@@ -2,17 +2,22 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { DistrictArea } from "@/lib/types";
-import { slugify } from "@/lib/slugify";
+import type { StateDistrictSummary } from "@/lib/types";
 import { AlertCircleIcon, CheckCircleIcon, SearchIcon } from "./icons";
 
-export default function DistrictAreaGrid({ areas }: { areas: DistrictArea[] }) {
+export default function StateDistrictsGrid({
+  stateSlug,
+  districts,
+}: {
+  stateSlug: string;
+  districts: StateDistrictSummary[];
+}) {
   const [query, setQuery] = useState("");
   const trimmed = query.trim().toLowerCase();
 
   const filtered = trimmed
-    ? areas.filter((a) => a.name.toLowerCase().includes(trimmed) || a.pincode.includes(trimmed))
-    : areas;
+    ? districts.filter((d) => d.name.toLowerCase().includes(trimmed))
+    : districts;
 
   return (
     <div>
@@ -21,45 +26,44 @@ export default function DistrictAreaGrid({ areas }: { areas: DistrictArea[] }) {
           <SearchIcon className="h-4 w-4 shrink-0 text-zinc-400" />
           <input
             type="text"
-            placeholder="Search pincode or area name"
+            placeholder="Search district name"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none"
           />
         </div>
-        <button
-          type="button"
-          className="shrink-0 rounded-full bg-amber-500 px-6 py-2.5 text-sm font-bold text-white hover:bg-amber-600"
-        >
-          Search
-        </button>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-500">No areas match &ldquo;{query}&rdquo;.</p>
+        <p className="mt-8 text-sm text-zinc-500">No districts match &ldquo;{query}&rdquo;.</p>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {filtered.map((a) => (
+          {filtered.map((d) => (
             <Link
-              key={`${a.pincode}-${a.name}`}
-              href={`/pincode/${a.pincode}/${slugify(a.name)}`}
+              key={d.slug}
+              href={`/states/${stateSlug}/district/${d.slug}`}
               className={`rounded-xl border p-4 shadow-sm transition-colors ${
-                a.active
+                d.activeCount > 0
                   ? "border-amber-400 bg-amber-50"
                   : "border-zinc-200 bg-white hover:border-amber-300"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className={`font-bold ${a.active ? "text-amber-700" : "text-zinc-900"}`}>
-                  {a.name}
+                <span className={`font-bold ${d.activeCount > 0 ? "text-amber-700" : "text-zinc-900"}`}>
+                  {d.name}
                 </span>
-                {a.active ? (
-                  <AlertCircleIcon className="h-5 w-5 shrink-0 text-amber-600" />
+                {d.activeCount > 0 ? (
+                  <span className="flex shrink-0 items-center gap-1 text-xs font-bold uppercase tracking-wide text-red-600">
+                    <AlertCircleIcon className="h-4 w-4" />
+                    {d.activeCount} active
+                  </span>
                 ) : (
                   <CheckCircleIcon className="h-5 w-5 shrink-0 text-emerald-500" />
                 )}
               </div>
-              <p className="mt-1 text-sm text-zinc-500">{a.pincode}</p>
+              <p className="mt-1 text-sm text-zinc-500">
+                {d.pincodeCount} PIN code{d.pincodeCount === 1 ? "" : "s"} tracked
+              </p>
             </Link>
           ))}
         </div>

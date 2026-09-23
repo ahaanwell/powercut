@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { isValidPincode } from "@/lib/pincode";
 import { searchLocations } from "@/lib/api";
+import { slugify } from "@/lib/slugify";
 
 export const metadata: Metadata = {
   title: "Search results",
@@ -56,7 +57,7 @@ export default async function SearchPage({ searchParams }: Props) {
             {results.map((r) => (
               <li key={r.pincode}>
                 <Link
-                  href={`/pincode/${r.pincode}`}
+                  href={`/pincode/${r.pincode}${r.area ? `/${slugify(r.area)}` : ""}`}
                   className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm hover:border-amber-400"
                 >
                   <span className="font-medium text-zinc-900">

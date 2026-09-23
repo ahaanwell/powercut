@@ -24,16 +24,14 @@ export default async function GovHeroBanner() {
           Community Citizen Service Portal
         </p>
         <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
-          Real-Time Power Outage
-          <br />
-          Reporting &amp; Monitoring System
+          PowerCut &mdash; Live Power Outage Tracker for India
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm text-blue-200 sm:text-base">
-          A citizen-driven initiative to report, verify, and track electricity supply
-          disruptions across India &mdash; enter your PIN code for live status.
+          Is there a power cut in your area? Find out instantly &mdash; a citizen-driven
+          initiative to report, verify, and track electricity supply disruptions across India.
         </p>
 
-        <div className="mx-auto mt-8 max-w-2xl rounded-lg bg-white p-3 text-left shadow-xl">
+        <div className="relative isolate mx-auto mt-8 max-w-2xl rounded-lg bg-white p-3 text-left shadow-xl">
           <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
             Check Outage Status by PIN Code
           </p>

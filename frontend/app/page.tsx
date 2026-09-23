@@ -4,7 +4,9 @@ import HeroReportsPanel from "@/components/HeroReportsPanel";
 import LiveGridSection from "@/components/LiveGridSection";
 import BrowseByRegion from "@/components/BrowseByRegion";
 import QuickLinksGrid from "@/components/QuickLinksGrid";
+import NearMeCard from "@/components/NearMeCard";
 import SeoContent from "@/components/SeoContent";
+import LocalOutageFaq from "@/components/LocalOutageFaq";
 import FaqAccordion from "@/components/FaqAccordion";
 
 export default function Home() {
@@ -15,6 +17,10 @@ export default function Home() {
       <div className="relative z-10 mx-auto -mt-12 max-w-6xl px-4 sm:px-6">
         <QuickLinksGrid />
       </div>
+
+      <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+        <NearMeCard />
+      </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <Suspense
@@ -48,6 +54,10 @@ export default function Home() {
 
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <SeoContent />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <LocalOutageFaq />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">

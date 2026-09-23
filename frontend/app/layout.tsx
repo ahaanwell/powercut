@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/Header";
 import NoticesTicker from "@/components/NoticesTicker";
+import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import RestoreTextSize from "@/components/RestoreTextSize";
@@ -103,6 +104,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main id="main-content" className="flex-1">
           {children}
         </main>
+        <Disclaimer />
         <Footer />
         <ScrollToTopButton />
       </body>

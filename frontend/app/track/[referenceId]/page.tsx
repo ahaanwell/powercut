@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { trackReport } from "@/lib/api";
+import { slugify } from "@/lib/slugify";
 import TrackSearchForm from "@/components/TrackSearchForm";
 import { AlertCircleIcon, CheckCircleIcon, SearchIcon } from "@/components/icons";
 
@@ -108,7 +109,7 @@ export default async function TrackResultPage({ params }: Props) {
             </dl>
 
             <Link
-              href={`/pincode/${report.pincode}`}
+              href={`/pincode/${report.pincode}${report.area ? `/${slugify(report.area)}` : ""}`}
               className="mt-6 block rounded bg-blue-950 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-blue-900"
             >
               View Full Area Status

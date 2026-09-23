@@ -1,6 +1,9 @@
 // Approximate mapping of Indian PIN code first-two-digit prefixes to states/UTs,
-// based on the India Post PIN zone structure. Border districts can be imprecise
-// since India Post zones don't align perfectly with state boundaries.
+// based on the India Post PIN zone structure. Used only as a fallback for
+// pincodes not found in the bundled directory below — border districts can
+// be imprecise here since India Post zones don't align perfectly with state
+// boundaries (e.g. Bihar's Madhubani district uses "84"-prefix codes that
+// this map attributes to Jharkhand).
 const PREFIX_STATE_MAP = {
   11: "Delhi",
   12: "Haryana",
@@ -73,16 +76,25 @@ const PREFIX_STATE_MAP = {
   85: "Bihar",
 };
 
+// Authoritative pincode -> state lookup, built once from the bundled India
+// Post directory (~148k real post offices). This is what actually decides a
+// report's state whenever the pincode is a known one — the prefix map above
+// is only a fallback for pincodes outside that snapshot.
+const PINCODE_DIRECTORY = require("../data/pincodeDirectory.json");
+const PINCODE_TO_STATE = {};
+for (const [state, districts] of Object.entries(PINCODE_DIRECTORY)) {
+  for (const areas of Object.values(districts)) {
+    for (const area of areas) {
+      PINCODE_TO_STATE[area.pincode] = state;
+    }
+  }
+}
+
 function getStateFromPincode(pincode) {
   if (!/^[1-9][0-9]{5}$/.test(pincode)) return "Unknown";
+  if (PINCODE_TO_STATE[pincode]) return PINCODE_TO_STATE[pincode];
   const prefix = Number(pincode.slice(0, 2));
   return PREFIX_STATE_MAP[prefix] || "Other";
 }
 
-function getPrefixesForState(state) {
-  return Object.entries(PREFIX_STATE_MAP)
-    .filter(([, name]) => name.toLowerCase() === state.toLowerCase())
-    .map(([prefix]) => prefix);
-}
-
-module.exports = { getStateFromPincode, getPrefixesForState, PREFIX_STATE_MAP };
+module.exports = { getStateFromPincode, PREFIX_STATE_MAP };

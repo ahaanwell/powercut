@@ -4,9 +4,16 @@ import { notFound } from "next/navigation";
 import { getStateDetail } from "@/lib/api";
 import { buildBreadcrumbJsonLd } from "@/lib/breadcrumbs";
 import ReportCard from "@/components/ReportCard";
-import DistrictAreaGrid from "@/components/DistrictAreaGrid";
+import StateDistrictsGrid from "@/components/StateDistrictsGrid";
 import StateDetailContent from "@/components/StateDetailContent";
-import { BoltIcon, MapPinIcon, ShieldIcon, CheckCircleIcon, ChartBarIcon } from "@/components/icons";
+import {
+  BoltIcon,
+  MapPinIcon,
+  ShieldIcon,
+  CheckCircleIcon,
+  ChartBarIcon,
+  AlertCircleIcon,
+} from "@/components/icons";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -14,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await getStateDetail(slug).catch(() => null);
   const name = data?.state || slug;
-  const areaCount = data?.areas.length;
+  const areaCount = data?.areaCount;
 
   return {
     title: { absolute: `Power Cut in ${name} Today | Live Outage Map & PIN Code Status` },
@@ -39,7 +46,7 @@ export default async function StateDetailPage({ params }: Props) {
     notFound();
   }
 
-  const activeAreas = data.areas.filter((a) => a.active).length;
+  const activeAreas = data.districts.reduce((sum, d) => sum + d.activeCount, 0);
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Home", path: "/" },
@@ -66,10 +73,10 @@ export default async function StateDetailPage({ params }: Props) {
             <BoltIcon className="h-7 w-7 text-amber-500" />
             Power Cut in {data.state}
           </h1>
-          {data.areas.length > 0 && (
+          {data.areaCount > 0 && (
             <p className="mt-1 text-zinc-600">
-              {data.areas.length} areas tracked (sample) &middot;{" "}
-              <span className="font-semibold text-red-600">{activeAreas} active outage areas</span>
+              {data.districts.length} district{data.districts.length === 1 ? "" : "s"} &middot;{" "}
+              {data.areaCount} areas tracked (sample)
             </p>
           )}
 
@@ -85,6 +92,16 @@ export default async function StateDetailPage({ params }: Props) {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        {activeAreas > 0 && (
+          <div className="mb-8 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+            <AlertCircleIcon className="h-5 w-5 shrink-0 text-red-600" />
+            <p className="text-sm font-semibold text-red-800">
+              {activeAreas} area{activeAreas === 1 ? "" : "s"} in {data.state} currently reporting
+              active power cuts.
+            </p>
+          </div>
+        )}
+
         {data.pincodeCounts.length > 0 && (
           <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
             <div className="flex items-center gap-2 bg-blue-950 px-5 py-3">
@@ -107,15 +124,14 @@ export default async function StateDetailPage({ params }: Props) {
           </div>
         )}
 
-        {data.areas.length > 0 && (
+        {data.districts.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-zinc-900">Areas &amp; PIN Codes</h2>
+            <h2 className="text-lg font-bold text-zinc-900">Districts in {data.state}</h2>
             <p className="mt-1 text-sm text-zinc-500">
-              A sample of tracked localities across {data.state} &mdash; not an exhaustive
-              directory.
+              Open a district to see its full list of tracked areas and PIN codes.
             </p>
             <div className="mt-4">
-              <DistrictAreaGrid areas={data.areas} />
+              <StateDistrictsGrid stateSlug={data.slug} districts={data.districts} />
             </div>
           </div>
         )}

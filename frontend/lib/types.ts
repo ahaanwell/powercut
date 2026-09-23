@@ -50,6 +50,26 @@ export interface StateDetail {
   slug: string;
   reports: Report[];
   pincodeCounts: { pincode: string; count: number }[];
+  districts: StateDistrictSummary[];
+  areaCount: number;
+}
+
+export interface StateDistrictSummary {
+  name: string;
+  slug: string;
+  pincodeCount: number;
+  activeCount: number;
+}
+
+export interface StateDistrictDetail {
+  state: string;
+  stateSlug: string;
+  district: string;
+  districtSlug: string;
+  totalAreas: number;
+  activeAreas: number;
+  reports: Report[];
+  pincodeCounts: { pincode: string; count: number }[];
   areas: DistrictArea[];
 }
 
@@ -103,6 +123,13 @@ export interface LocationResult {
 export interface NearbyPincode {
   pincode: string;
   name: string;
+  district: string;
+  state: string;
+}
+
+export interface ReverseGeocode {
+  pincode: string;
+  area: string;
   district: string;
   state: string;
 }

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { getCities, getStates } from "@/lib/api";
+import { getAllPincodes, getCities, getStateDetail, getStates } from "@/lib/api";
+import { slugify } from "@/lib/slugify";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.powercut.info";
 
@@ -53,6 +54,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  const stateDistrictLists = await Promise.all(
+    states.map((s) => getStateDetail(s.slug).catch(() => null))
+  );
+  for (const detail of stateDistrictLists) {
+    if (!detail) continue;
+    for (const d of detail.districts) {
+      entries.push({
+        url: `${SITE_URL}/states/${detail.slug}/district/${d.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "hourly",
+        priority: 0.4,
+      });
+    }
+  }
+
   for (const c of cities) {
     entries.push({
       url: `${SITE_URL}/cities/${c.slug}`,
@@ -68,6 +84,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "hourly",
       priority: 0.5,
+    });
+  }
+
+  const { pincodes } = await getAllPincodes().catch(() => ({ pincodes: [] }));
+  for (const { pincode, area } of pincodes) {
+    entries.push({
+      url: `${SITE_URL}/pincode/${pincode}${area ? `/${slugify(area)}` : ""}`,
+      lastModified: new Date(),
+      changeFrequency: "hourly",
+      priority: 0.3,
     });
   }
 

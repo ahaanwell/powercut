@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Report } from "@/lib/types";
+import { slugify } from "@/lib/slugify";
 import StatusBadge from "./StatusBadge";
 import ConfirmButtons from "./ConfirmButtons";
 
@@ -27,7 +28,10 @@ export default function ReportCard({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {showPincode ? (
-            <Link href={`/pincode/${report.pincode}`} className="font-semibold text-zinc-900 hover:underline">
+            <Link
+              href={`/pincode/${report.pincode}${report.area ? `/${slugify(report.area)}` : ""}`}
+              className="font-semibold text-zinc-900 hover:underline"
+            >
               {report.pincode}
               {report.area ? ` — ${report.area}` : ""}
             </Link>

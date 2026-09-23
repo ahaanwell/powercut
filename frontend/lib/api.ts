@@ -16,7 +16,9 @@ import type {
   PincodeStatus,
   PincodeTrend,
   Report,
+  ReverseGeocode,
   StateDetail,
+  StateDistrictDetail,
   StateSummary,
   StatsOverview,
 } from "./types";
@@ -88,6 +90,12 @@ export function getStateDetail(slug: string) {
   return apiFetch<StateDetail>(`/stats/states/${slug}`, { next: { revalidate: 60 } });
 }
 
+export function getStateDistrictDetail(slug: string, districtSlug: string) {
+  return apiFetch<StateDistrictDetail>(`/stats/states/${slug}/districts/${districtSlug}`, {
+    next: { revalidate: 3600 },
+  });
+}
+
 export function getDistrictDetail(slug: string) {
   return apiFetch<DistrictDetail>(`/district/${slug}`, { next: { revalidate: 3600 } });
 }
@@ -97,8 +105,10 @@ export function getDistricts() {
 }
 
 export function getPincodeLocalities(pincode: string) {
+  // Locality-to-pincode mapping is static postal geography, not live outage
+  // data — matches the backend's own 24h in-memory cache for this endpoint.
   return apiFetch<{ localities: PincodeLocality[] }>(`/pincode/${pincode}/localities`, {
-    cache: "no-store",
+    next: { revalidate: 86400 },
   });
 }
 
@@ -133,6 +143,16 @@ export function getPincodeTrend(pincode: string) {
 
 export function getPincodeGeocode(pincode: string) {
   return apiFetch<Geocode>(`/pincode/${pincode}/geocode`, { next: { revalidate: 86400 } });
+}
+
+export function getReverseGeocode(lat: number, lng: number) {
+  return apiFetch<ReverseGeocode>(`/pincode/reverse?lat=${lat}&lng=${lng}`, { cache: "no-store" });
+}
+
+export function getAllPincodes() {
+  return apiFetch<{ pincodes: { pincode: string; area: string }[] }>(`/pincode/all`, {
+    next: { revalidate: 86400 },
+  });
 }
 
 export function getPincodeComments(pincode: string, hours = 48) {

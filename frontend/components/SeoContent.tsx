@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const HOW_TO_STEPS = [
   {
     name: "Enter your PIN code",
@@ -55,31 +57,6 @@ export default function SeoContent() {
         </p>
 
         <section>
-          <h3 className="font-bold text-zinc-900">What Is a Power Cut and Why Does It Happen?</h3>
-          <p className="mt-1">
-            A power cut, or electricity outage, is any interruption in the supply of electricity
-            to a home, building, or area. In India, outages generally fall into a few categories.
-            <strong className="font-semibold text-zinc-800"> Scheduled maintenance</strong>{" "}
-            outages are planned in advance by the local DISCOM (distribution company) to repair
-            or upgrade transformers, lines, or substations, and are usually announced ahead of
-            time.{" "}
-            <strong className="font-semibold text-zinc-800">Unscheduled faults</strong> happen
-            without warning — a blown fuse, a tripped circuit breaker, a damaged transformer, a
-            fallen tree on a line, or a cable fault — and are the most common reason for a sudden,
-            localized power cut.{" "}
-            <strong className="font-semibold text-zinc-800">Weather-related outages</strong> spike
-            during monsoon season and storms, when high winds, flooding, or lightning strikes
-            damage overhead lines and substations.{" "}
-            <strong className="font-semibold text-zinc-800">Load shedding</strong>, where supply
-            is deliberately reduced during periods of peak demand or generation shortfall, is
-            less common today than it was a decade ago, but still occurs in some regions during
-            heatwaves or supply constraints. Because these causes affect different areas at
-            different times, an outage that hits one street may leave the next one completely
-            unaffected — which is exactly why hyperlocal, PIN-code-level reporting is useful.
-          </p>
-        </section>
-
-        <section>
           <h3 className="font-bold text-zinc-900">How to Check Power Cut Status for Your Area</h3>
           <ol className="mt-1 list-decimal space-y-1.5 pl-5">
             {HOW_TO_STEPS.map((s) => (
@@ -90,84 +67,133 @@ export default function SeoContent() {
           </ol>
         </section>
 
-        <section>
-          <h3 className="font-bold text-zinc-900">How Outage Reporting &amp; Verification Works</h3>
-          <p className="mt-1">
-            Anyone can anonymously report a power cut for their area in a few seconds — no
-            account or sign-up required. Each report is timestamped and grouped by pincode, and
-            neighbors in the same area can confirm whether the outage is still ongoing or has
-            already been resolved. Once enough confirmations come in, the status automatically
-            updates from &ldquo;Reported&rdquo; to &ldquo;Restored,&rdquo; so the information
-            stays current without depending on any single person continuing to check back. Every
-            report also receives a unique complaint reference number (for example,
-            PCT-2026-XXXXXXXX) that you can use on the Track Complaint page to look up its status
-            later, similar to how a formal grievance-tracking system works.
-          </p>
+        <section className="border-t border-zinc-100 pt-6">
+          <h2 className="text-lg font-extrabold text-blue-950">
+            Power Cut in My Area &ndash; Check Live Power Outage Status
+          </h2>
+          <div className="mt-3 space-y-4">
+            <p>
+              A power cut in my area can happen without warning and can disrupt work, travel,
+              businesses, communication, and everyday life. When electricity goes off, the first
+              thing most people want to know is whether the problem is limited to their home,
+              affecting the surrounding locality, or part of a larger outage.
+            </p>
+            <p>
+              Our power-cut tracking platform helps you quickly check power outage status using
+              your 6-digit PIN code or locality. Instead of waiting for information to spread
+              through local groups or relying only on word of mouth, you can search your area and
+              see recent community-reported power-cut activity.
+            </p>
+          </div>
         </section>
 
         <section>
-          <h3 className="font-bold text-zinc-900">
-            Understanding Your Area&apos;s Power Score and Outage Trends
-          </h3>
-          <p className="mt-1">
-            Every tracked PIN code has an Area Power Score — an estimated 30-day uptime
-            percentage calculated from how long reported outages in that area lasted before
-            being marked restored. A score above 95% is labeled low risk, 80&ndash;95% moderate
-            risk, and below 80% high risk. Alongside the score, a 90-day outage trend chart shows
-            whether an area has had a spike in reports recently or has been consistently stable,
-            making it easier to spot recurring load-shedding or infrastructure patterns over
-            time rather than judging an area by a single outage.
-          </p>
+          <h3 className="font-bold text-zinc-900">Check Power Outage Near Me</h3>
+          <div className="mt-1 space-y-3">
+            <p>
+              Looking for a power outage near me? Start by entering your PIN code or locality
+              name on our website. The platform displays reported power cuts associated with that
+              area, helping you understand whether other people nearby are experiencing the same
+              issue.
+            </p>
+            <p>
+              If your electricity is currently off, you can also report the outage. Your report
+              is recorded with a unique complaint reference number and can help other people in
+              the same area understand that an outage has been reported.
+            </p>
+            <p>
+              The information on the platform is based on reports and confirmations from users.
+              This makes it possible to build a local picture of ongoing electricity
+              interruptions as people in the affected area share updates.
+            </p>
+          </div>
         </section>
 
         <section>
-          <h3 className="font-bold text-zinc-900">
-            Coverage Across States, Cities &amp; Districts
-          </h3>
-          <p className="mt-1">
-            Because tracking is organized by PIN code, every Indian state and union territory —
-            from Maharashtra, Karnataka, and Tamil Nadu to Uttar Pradesh, West Bengal, and
-            Delhi — can be searched. Dedicated directories are also available for major metro
-            areas, including Mumbai, Delhi NCR, Bengaluru, Pune, Hyderabad, Chennai, Kolkata, and
-            Ahmedabad, plus district-level area listings such as New Delhi, North Delhi, and
-            South Delhi. The live outage map and state, city, and district pages make it easy to
-            browse electricity supply status beyond just your own pincode, whether you&apos;re
-            checking on family in another city or researching outage patterns for a whole
-            region.
-          </p>
+          <h3 className="font-bold text-zinc-900">Power Cut Near My Location</h3>
+          <div className="mt-1 space-y-3">
+            <p>
+              When searching for a power cut near my location, you can use your PIN code or
+              search for your locality to find relevant outage activity. You do not need to
+              create an account to submit a report or track a complaint.
+            </p>
+            <p>
+              Once an outage has been reported, other users in the same area can confirm that
+              their electricity is still unavailable. They can also report when power has
+              returned. This community confirmation system helps keep the recorded outage status
+              updated.
+            </p>
+            <p>
+              After three restoration confirmations, the reported outage is automatically marked
+              as Restored. This provides a simple way to see whether a reported power cut is
+              still active or has been confirmed as resolved by people in the affected area.
+            </p>
+          </div>
         </section>
 
         <section>
-          <h3 className="font-bold text-zinc-900">What to Do During a Power Outage</h3>
-          <p className="mt-1">
-            If your power goes out, first check your own building&apos;s MCB or fuse box and any
-            shared meter room to rule out a local trip before assuming it&apos;s an area-wide
-            cut. Keep your refrigerator and freezer closed as much as possible to preserve food.
-            Unplug sensitive electronics and appliances to protect them from surges when power
-            returns. Keep a charged flashlight or power bank on hand rather than relying on
-            candles indoors. Never approach or touch a fallen power line — treat every downed
-            line as live and report it to your DISCOM immediately. For the official electricity
-            complaint helpline in most Indian states, you can also dial{" "}
-            <a href="tel:1912" className="font-semibold text-blue-900 hover:underline">
-              1912
-            </a>
-            . Reporting the outage on PowerCut alongside contacting your utility helps
-            your neighbors know they&apos;re not alone while waiting for restoration.
-          </p>
+          <h3 className="font-bold text-zinc-900">Check Power Outage Status</h3>
+          <div className="mt-1 space-y-3">
+            <p>
+              Checking the power outage status can help you understand the latest recorded
+              situation before making plans or reporting the same issue again. Search your PIN
+              code or locality to see available outage information and the latest community
+              confirmations.
+            </p>
+            <p>
+              If you have already reported an outage, you can use your complaint reference number
+              on the{" "}
+              <Link href="/track" className="font-medium text-blue-900 hover:underline">
+                Track Complaint
+              </Link>{" "}
+              page. The reference number lets you check the recorded status without needing an
+              account.
+            </p>
+            <p>
+              Because outage information can change as new reports and confirmations are
+              submitted, the status shown on the website represents the latest information
+              recorded by the community.
+            </p>
+          </div>
         </section>
 
         <section>
-          <h3 className="font-bold text-zinc-900">Why Community-Reported Data Matters — and Its Limits</h3>
-          <p className="mt-1">
-            PowerCut is an independent, community-driven project and is not affiliated
-            with any government agency, DISCOM, or electricity provider, and it does not have
-            access to official grid telemetry. Its value comes entirely from real people
-            reporting what they&apos;re experiencing in real time, which means coverage is
-            naturally strongest in areas with active users and can be sparse or outdated
-            elsewhere. Reports may occasionally be incomplete, delayed, or inaccurate. Treat it
-            as a fast, crowd-sourced pulse check on your area — a useful first signal, not a
-            replacement for your utility&apos;s official outage information in an emergency.
-          </p>
+          <h3 className="font-bold text-zinc-900">Scheduled Power Cuts</h3>
+          <div className="mt-1 space-y-3">
+            <p>
+              Some electricity interruptions may be scheduled power cuts related to maintenance,
+              repairs, upgrades, or other planned work by the local electricity provider.
+              Scheduled outage information may be announced separately by the relevant
+              electricity provider.
+            </p>
+            <p>
+              Our platform can help you discover reported power-cut activity in your area, but it
+              should not be treated as an official notice from an electricity provider. For
+              confirmed scheduled maintenance timings or official restoration information, users
+              should also check announcements from their local electricity provider.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h3 className="font-bold text-zinc-900">Explore Power-Cut Activity in Your Area</h3>
+          <div className="mt-1 space-y-3">
+            <p>
+              Power cuts are not always isolated incidents. Our website allows you to look beyond
+              a single report using the live outage map, statistics dashboard, Area Power Score,
+              and 90-day trends.
+            </p>
+            <p>
+              You can also browse tracked activity through{" "}
+              <Link href="/states" className="font-medium text-blue-900 hover:underline">
+                state, city, and district directories
+              </Link>
+              . Whether you are checking a power cut in my area, searching for a power outage
+              near me, or looking for a power cut near my location, the platform provides a
+              convenient way to discover community-reported electricity outage activity and track
+              its latest recorded status.
+            </p>
+          </div>
         </section>
       </div>
     </div>

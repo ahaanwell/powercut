@@ -119,7 +119,7 @@ export default function HeroSearchBar() {
       </form>
 
       {open && isValidPincode(value) && (
-        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
+        <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
           {loading ? (
             <p className="px-4 py-3 text-sm text-zinc-500">Searching localities&hellip;</p>
           ) : localities.length === 0 ? (

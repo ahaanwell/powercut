@@ -1,10 +1,19 @@
 import Link from "next/link";
-import { getRecentReports } from "@/lib/api";
+import { getPincodeLocalities, getRecentReports } from "@/lib/api";
 import { timeAgo } from "@/lib/timeAgo";
+import { slugify } from "@/lib/slugify";
 import { BoltIcon } from "./icons";
 
 export default async function HeroReportsPanel() {
   const { reports } = await getRecentReports(6).catch(() => ({ reports: [] }));
+
+  const withNames = await Promise.all(
+    reports.map(async (r) => {
+      if (r.area) return { ...r, displayName: r.area };
+      const { localities } = await getPincodeLocalities(r.pincode).catch(() => ({ localities: [] }));
+      return { ...r, displayName: localities[0]?.name || r.pincode };
+    })
+  );
 
   return (
     <div className="w-full">
@@ -24,12 +33,12 @@ export default async function HeroReportsPanel() {
         </p>
       ) : (
         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {reports.map((r) => {
+          {withNames.map((r) => {
             const isRestored = r.status === "restored";
             return (
               <li key={r._id}>
                 <Link
-                  href={`/pincode/${r.pincode}`}
+                  href={`/pincode/${r.pincode}${r.displayName && r.displayName !== r.pincode ? `/${slugify(r.displayName)}` : ""}`}
                   className={`flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-zinc-200 ${
                     isRestored ? "hover:ring-emerald-400" : "hover:ring-amber-400"
                   }`}
@@ -39,7 +48,7 @@ export default async function HeroReportsPanel() {
                       className={`h-2 w-2 shrink-0 rounded-full ${isRestored ? "bg-emerald-500" : "bg-red-500"}`}
                     />
                     <div>
-                      <p className="font-semibold text-zinc-900">{r.area || r.pincode}</p>
+                      <p className="font-semibold text-zinc-900">{r.displayName}</p>
                       <p className="text-xs text-zinc-500">
                         <span className={`font-bold ${isRestored ? "text-emerald-600" : "text-red-600"}`}>
                           {isRestored ? "RESTORED" : "ACTIVE"}
