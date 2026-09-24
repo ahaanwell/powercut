@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllPincodes, getCities, getStateDetail, getStates } from "@/lib/api";
+import { getAllPincodes, getStateDetail, getStates } from "@/lib/api";
 import { slugify } from "@/lib/slugify";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.powercut.info";
@@ -33,10 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/terms",
   ];
 
-  const [{ states }, { cities }] = await Promise.all([
-    getStates().catch(() => ({ states: [] })),
-    getCities().catch(() => ({ cities: [] })),
-  ]);
+  const { states } = await getStates().catch(() => ({ states: [] }));
 
   const entries: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
     url: `${SITE_URL}${route}`,
@@ -67,15 +64,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.4,
       });
     }
-  }
-
-  for (const c of cities) {
-    entries.push({
-      url: `${SITE_URL}/cities/${c.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "hourly",
-      priority: 0.5,
-    });
   }
 
   for (const slug of DISTRICT_SLUGS) {

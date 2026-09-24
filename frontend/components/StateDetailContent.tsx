@@ -44,30 +44,37 @@ export default function StateDetailContent({ state }: { state: string }) {
 
       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="text-lg font-extrabold text-blue-950">
-          Reporting and Reference Numbers in {state}
+          Power Cut in {state} &ndash; Check Live Power Outage Status
         </h2>
-        <div className="mt-3 space-y-3 text-sm leading-relaxed text-zinc-600">
+        <div className="mt-3 space-y-5 text-sm leading-relaxed text-zinc-600">
           <p>
-            Anyone experiencing a power cut anywhere in {state} can submit an anonymous report in
-            under a minute — no account, phone number, or address needed beyond the PIN code
-            itself. Each report generates a unique complaint reference number (formatted like
-            PCT-2026-XXXXXXXX) that works the same way a formal grievance ticket does: save it,
-            and look up that exact report&apos;s status anytime on the{" "}
-            <Link href="/track" className="font-medium text-blue-900 hover:underline">
-              Track Complaint
+            Experiencing a power cut in {state}? Search your PIN code or locality to check recent
+            community-reported outages and the latest recorded power outage status in your area.
+            You can also{" "}
+            <Link href="/report" className="font-medium text-blue-900 hover:underline">
+              report an outage
             </Link>{" "}
-            page, even weeks later.
+            and track it using a unique complaint reference number.
           </p>
-          <p>
-            If you&apos;re unsure whether an outage in {state} is planned or a fault, check the{" "}
-            <Link href="/maintenance" className="font-medium text-blue-900 hover:underline">
-              scheduled maintenance notices
-            </Link>{" "}
-            first — if nothing is listed for your pincode, it&apos;s most likely unplanned and
-            worth reporting. While waiting for restoration, avoid touching any exposed or fallen
-            lines, keep your fridge and freezer closed to preserve food, and unplug sensitive
-            electronics to protect them from surges when supply returns.
-          </p>
+          <div>
+            <h3 className="font-bold text-zinc-900">
+              Can I Check Power Outage Status in {state}?
+            </h3>
+            <p className="mt-1">
+              Yes. You can check the power outage status in {state} by searching your PIN code or
+              locality. See whether an outage has been reported, whether users have confirmed that
+              power is still down, or whether restoration has been confirmed.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-zinc-900">Scheduled Power Cuts in {state}</h3>
+            <p className="mt-1">
+              Scheduled power cuts in {state} may occur due to maintenance, repairs, or network
+              work. Check your local electricity provider for official schedules and timings. Our
+              platform helps you view community-reported power-cut activity in different areas of{" "}
+              {state}.
+            </p>
+          </div>
         </div>
       </section>
 

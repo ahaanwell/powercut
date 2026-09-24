@@ -80,8 +80,8 @@ export default function MaintenancePageContent() {
             state
           </Link>{" "}
           or{" "}
-          <Link href="/cities/mumbai" className="font-medium text-blue-900 hover:underline">
-            city
+          <Link href="/district/mumbai" className="font-medium text-blue-900 hover:underline">
+            district
           </Link>
           .
         </p>

@@ -58,6 +58,6 @@ export const FAQS: FaqItem[] = [
   {
     category: "Coverage",
     q: "Which cities and states does PowerCut cover?",
-    a: "Any valid 6-digit Indian PIN code can be tracked. Dedicated directories are available for major metros (Mumbai, Delhi NCR, Bengaluru, Pune, Hyderabad, Chennai, Kolkata, Ahmedabad) and every Indian state and union territory.",
+    a: "Any valid 6-digit Indian PIN code can be tracked. Dedicated district directories are available for major metros (Mumbai, New Delhi, North Delhi, South Delhi, Bangalore, Pune, Hyderabad, Chennai, Kolkata, Ahmedabad) and every Indian state and union territory.",
   },
 ];

@@ -25,11 +25,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.powercut.info"
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "PowerCut — Live Power Outage Status by PIN Code",
+    default: "PowerCut- Power cut in my area | Live Power Outage Tracker for India",
     template: "%s | PowerCut",
   },
   description:
-    "Check live, community-reported power cut and electricity outage status for any Indian PIN code. Report an outage or confirm restoration in your area.",
+    "Check power cut in your area with PowerCut. Find live power outage status, report outages, track complaints, and check restoration updates by PIN code or locality",
   keywords: [
     "power cut",
     "power outage",
@@ -40,15 +40,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "PowerCut",
-    title: "PowerCut — Live Power Outage Status by PIN Code",
+    title: "PowerCut- Power cut in my area | Live Power Outage Tracker for India",
     description:
-      "Check live, community-reported power cut status for any Indian PIN code, or report an outage in your area.",
+      "Check power cut in your area with PowerCut. Find live power outage status, report outages, track complaints, and check restoration updates by PIN code or locality",
     url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "PowerCut — Live Power Outage Status by PIN Code",
-    description: "Community-reported power outage tracking by PIN code across India.",
+    title: "PowerCut- Power cut in my area | Live Power Outage Tracker for India",
+    description:
+      "Check power cut in your area with PowerCut. Find live power outage status, report outages, track complaints, and check restoration updates by PIN code or locality",
   },
   alternates: {
     canonical: "/",

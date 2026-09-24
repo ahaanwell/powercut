@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { getCities, getDistricts, getStates } from "@/lib/api";
+import { getDistricts, getStates } from "@/lib/api";
 import { BoltIcon, CalendarIcon } from "./icons";
 
 type PillItem = { key: string; label: string; href: string; count?: number };
 
 export default async function BrowseByRegion() {
-  const [{ cities }, { states }, { districts }] = await Promise.all([
-    getCities().catch(() => ({ cities: [] })),
+  const [{ states }, { districts }] = await Promise.all([
     getStates().catch(() => ({ states: [] })),
     getDistricts().catch(() => ({ districts: [] })),
   ]);
@@ -15,12 +14,6 @@ export default async function BrowseByRegion() {
     key: d.slug,
     label: d.name,
     href: `/district/${d.slug}`,
-  }));
-  const cityItems: PillItem[] = cities.map((c) => ({
-    key: c.slug,
-    label: c.city,
-    href: `/cities/${c.slug}`,
-    count: c.activeCount,
   }));
   const stateItems: PillItem[] = states.map((s) => ({
     key: s.slug,
@@ -57,8 +50,7 @@ export default async function BrowseByRegion() {
           </Link>
         </div>
 
-        <RegionRow title="Browse by District" items={districtItems} />
-        <RegionRow title="Browse by City" items={cityItems} />
+        <RegionRow title="Browse by Cities" items={districtItems} />
         <RegionRow title="Browse by State" items={stateItems} isLast />
       </div>
     </div>

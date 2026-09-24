@@ -24,10 +24,10 @@ export default async function GovHeroBanner() {
           Community Citizen Service Portal
         </p>
         <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
-          PowerCut &mdash; Live Power Outage Tracker for India
+          Is There a Power Cut in Your Area? Find Out Instantly!
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm text-blue-200 sm:text-base">
-          Is there a power cut in your area? Find out instantly &mdash; a citizen-driven
+          Is there a power cut in your area? Find out instantly & a citizen-driven
           initiative to report, verify, and track electricity supply disruptions across India.
         </p>
 

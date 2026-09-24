@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { useEffect, useRef } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GridPoint } from "@/lib/types";
 import { ExpandIcon } from "./icons";
@@ -12,8 +12,20 @@ function statusColor(status: GridPoint["status"]): string {
   return status === "restored" ? "#22c55e" : "#ef4444";
 }
 
+// Leaflet's attribution control shows its own "Leaflet" self-credit
+// alongside whatever the TileLayer sets — the "Leaflet |" prefix is just
+// library branding, not a license requirement, so it can be turned off.
+// The OpenStreetMap credit itself stays: their tile usage policy requires
+// visible attribution, so that part is never removed.
+function HideLeafletAttributionPrefix() {
+  const map = useMap();
+  useEffect(() => {
+    map.attributionControl.setPrefix(false);
+  }, [map]);
+  return null;
+}
+
 export default function LiveGridMapInner({ points }: { points: GridPoint[] }) {
-  const [interactive, setInteractive] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   function toggleFullscreen() {
@@ -30,9 +42,10 @@ export default function LiveGridMapInner({ points }: { points: GridPoint[] }) {
       <MapContainer
         center={INDIA_CENTER}
         zoom={4}
-        scrollWheelZoom={false}
+        scrollWheelZoom
         style={{ height: "420px", width: "100%", background: "#0a0a0a" }}
       >
+        <HideLeafletAttributionPrefix />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -87,18 +100,6 @@ export default function LiveGridMapInner({ points }: { points: GridPoint[] }) {
           Power restored
         </div>
       </div>
-
-      {!interactive && (
-        <button
-          type="button"
-          onClick={() => setInteractive(true)}
-          className="absolute inset-0 z-[999] flex items-center justify-center bg-transparent"
-        >
-          <span className="rounded-full bg-black/80 px-4 py-2 text-sm font-bold text-white shadow-lg">
-            👆 Tap to interact with map
-          </span>
-        </button>
-      )}
     </div>
   );
 }

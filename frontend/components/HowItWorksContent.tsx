@@ -89,12 +89,8 @@ export default function HowItWorksContent() {
               Browse the full{" "}
               <Link href="/states" className="font-medium text-blue-900 hover:underline">
                 state
-              </Link>
-              ,{" "}
-              <Link href="/cities/mumbai" className="font-medium text-blue-900 hover:underline">
-                city
-              </Link>
-              , or{" "}
+              </Link>{" "}
+              or{" "}
               <Link href="/district/new-delhi" className="font-medium text-blue-900 hover:underline">
                 district
               </Link>{" "}

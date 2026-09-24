@@ -1,6 +1,4 @@
 import type {
-  CityDetail,
-  CitySummary,
   Comment,
   ContactCategory,
   ContactMessageReceipt,
@@ -76,14 +74,6 @@ export function getStatsOverview() {
 
 export function getStates() {
   return apiFetch<{ states: StateSummary[] }>(`/stats/states`, { next: { revalidate: 60 } });
-}
-
-export function getCities() {
-  return apiFetch<{ cities: CitySummary[] }>(`/stats/cities`, { next: { revalidate: 60 } });
-}
-
-export function getCityDetail(slug: string) {
-  return apiFetch<CityDetail>(`/stats/cities/${slug}`, { next: { revalidate: 60 } });
 }
 
 export function getStateDetail(slug: string) {

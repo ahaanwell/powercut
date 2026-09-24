@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getCities, getDistricts, getStates } from "@/lib/api";
+import { getDistricts, getStates } from "@/lib/api";
 import CoveragePageContent from "@/components/CoveragePageContent";
 import {
   BoltIcon,
@@ -12,7 +12,7 @@ import {
 export const metadata: Metadata = {
   title: "Coverage",
   description:
-    "See where PowerCut's community-driven coverage is strongest across India — every PIN code, state, and major city — and how it grows.",
+    "See where PowerCut's community-driven coverage is strongest across India — every PIN code, state, and district — and how it grows.",
   alternates: { canonical: "/coverage" },
 };
 
@@ -24,15 +24,13 @@ const TRUST_BADGES = [
 ];
 
 export default async function CoveragePage() {
-  const [{ states }, { cities }, { districts }] = await Promise.all([
+  const [{ states }, { districts }] = await Promise.all([
     getStates().catch(() => ({ states: [] })),
-    getCities().catch(() => ({ cities: [] })),
     getDistricts().catch(() => ({ districts: [] })),
   ]);
 
   const SNAPSHOT = [
     { label: "States & UTs Tracked", value: states.length || "—" },
-    { label: "Major City Directories", value: cities.length || "—" },
     { label: "District Directories", value: districts.length || "—" },
     { label: "PIN Codes Supported", value: "All 6-Digit Codes" },
   ];

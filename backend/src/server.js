@@ -1,7 +1,6 @@
 require("dotenv").config();
 const app = require("./app");
 const connectDB = require("./config/db");
-const { warmCityCache } = require("./controllers/statsController");
 const { warmDistrictCache } = require("./controllers/districtController");
 const { refreshGridCache } = require("./controllers/pincodeController");
 
@@ -12,13 +11,10 @@ connectDB()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-      // Best-effort background warm-up of the area-scan caches, so the
-      // slow (multi-second) scan path is rarely hit by a live request.
+      // Best-effort background warm-up of the district area-scan cache, so
+      // the slow (multi-second) scan path is rarely hit by a live request.
       // Failures here are logged, never fatal.
-      warmDistrictCache()
-        .catch((err) => console.error("District cache warm-up failed:", err.message))
-        .then(() => warmCityCache())
-        .catch((err) => console.error("City cache warm-up failed:", err.message));
+      warmDistrictCache().catch((err) => console.error("District cache warm-up failed:", err.message));
 
       // Keep the live grid map's geocoded points warm proactively, so no
       // live request ever has to wait on the shared Nominatim queue for it.

@@ -68,26 +68,42 @@ export default function PincodeDetailContent({
       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="flex items-center gap-2 text-lg font-extrabold text-blue-950">
           <BoltIcon className="h-5 w-5 text-amber-500" />
-          About {place || `PIN code ${pincode}`}
+          Power Cut in {place || pincode} ({pincode}) &ndash; Live Status
         </h2>
-        <div className="mt-3 space-y-3 text-sm leading-relaxed text-zinc-600">
+        <div className="mt-3 space-y-5 text-sm leading-relaxed text-zinc-600">
           <p>
-            This page tracks real-time, community-reported power cut activity for{" "}
-            {locationLabel || `PIN code ${pincode}`}
-            {district ? `, part of ${district} district` : ""}. It combines recent outage
-            reports, restoration confirmations, and historical activity from the{" "}
+            The status shown above reflects what people in{" "}
+            {locationLabel || `PIN code ${pincode}`} have reported so far
             {reportCount > 0
-              ? `${reportCount} report${reportCount === 1 ? "" : "s"} logged so far`
-              : "reports submitted"}{" "}
-            to give a live picture of local conditions — updated the moment someone in the area
-            submits a report.
+              ? ` — ${reportCount} report${reportCount === 1 ? "" : "s"} logged for this PIN code`
+              : ", though no one has logged a report here yet"}
+            . There&apos;s nothing to install and no account to create — anyone nearby can{" "}
+            <Link href="/report" className="font-medium text-blue-900 hover:underline">
+              report an outage
+            </Link>{" "}
+            in under a minute, and every report gets its own reference number to look up later.
           </p>
-          <p>
-            Every report is anonymous and takes under a minute to submit, with no account or
-            phone number required beyond the PIN code itself. This is community-generated
-            information reflecting what local reporters have observed, not an official statement
-            from the electricity distribution company.
-          </p>
+          <div>
+            <h3 className="font-bold text-zinc-900">Is This Power Cut Still Active?</h3>
+            <p className="mt-1">
+              Check the timestamp on the most recent report below rather than the status badge
+              alone — power can come back without anyone remembering to mark it restored. If the
+              latest report is more than a few hours old and your own power is fine, it&apos;s
+              reasonable to assume it&apos;s been resolved.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-zinc-900">Landed on the Wrong Area?</h3>
+            <p className="mt-1">
+              PIN codes can cover a wide stretch of {district || "the district"}, so if{" "}
+              {place || "this locality"} isn&apos;t quite where you are, check the nearby PIN
+              codes listed alongside this page, or browse{" "}
+              <Link href={`/states/${stateSlug}`} className="font-medium text-blue-900 hover:underline">
+                every tracked area in {state}
+              </Link>{" "}
+              to find your exact one.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -151,6 +167,39 @@ export default function PincodeDetailContent({
           </p>
         </section>
       </div>
+
+      <section className="rounded-xl border-l-4 border-red-400 bg-white p-5 shadow-sm sm:p-6">
+        <h2 className="flex items-center gap-2 text-lg font-extrabold text-blue-950">
+          <AlertCircleIcon className="h-5 w-5 text-red-500" />
+          What to Do During a Power Cut in {place || pincode}
+        </h2>
+        <ul className="mt-3 grid gap-x-6 gap-y-2 text-sm leading-relaxed text-zinc-600 sm:grid-cols-2">
+          <li className="flex items-start gap-2">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+            Check your own MCB or fuse box first — a local trip can look identical to an
+            area-wide outage.
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+            Keep the fridge and freezer closed as much as possible to hold the cold in.
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+            Unplug sensitive electronics so a surge doesn&apos;t damage them when power returns.
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+            Never touch a fallen or exposed line — treat every downed wire as live.
+          </li>
+        </ul>
+        <p className="mt-3 text-xs text-zinc-500">
+          For the official electricity complaint helpline in most Indian states, dial{" "}
+          <a href="tel:1912" className="font-semibold text-blue-900 hover:underline">
+            1912
+          </a>
+          .
+        </p>
+      </section>
 
       <section className="rounded-xl border-l-4 border-zinc-300 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="flex items-center gap-2 text-lg font-extrabold text-blue-950">

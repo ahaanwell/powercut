@@ -73,20 +73,6 @@ export interface StateDistrictDetail {
   areas: DistrictArea[];
 }
 
-export interface CitySummary {
-  city: string;
-  slug: string;
-  activeCount: number;
-}
-
-export interface CityDetail {
-  city: string;
-  slug: string;
-  reports: Report[];
-  pincodeCounts: { pincode: string; count: number }[];
-  areas: DistrictArea[];
-}
-
 export interface DistrictArea {
   name: string;
   pincode: string;

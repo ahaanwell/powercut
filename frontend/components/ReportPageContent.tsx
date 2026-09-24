@@ -61,12 +61,8 @@ export default function ReportPageContent() {
             reporting is what makes the{" "}
             <Link href="/states" className="font-medium text-blue-900 hover:underline">
               state
-            </Link>
-            ,{" "}
-            <Link href="/cities/mumbai" className="font-medium text-blue-900 hover:underline">
-              city
-            </Link>
-            , and{" "}
+            </Link>{" "}
+            and{" "}
             <Link href="/district/new-delhi" className="font-medium text-blue-900 hover:underline">
               district
             </Link>{" "}

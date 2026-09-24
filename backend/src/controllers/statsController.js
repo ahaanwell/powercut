@@ -1,7 +1,6 @@
 const Report = require("../models/Report");
 const { PREFIX_STATE_MAP } = require("../utils/pincodeState");
-const { CITY_PREFIXES, pincodeRegexForCity } = require("../utils/cityPincodes");
-const { scanAreas, withActiveStatus } = require("../utils/areaScan");
+const { withActiveStatus } = require("../utils/areaScan");
 const slugify = require("../utils/slugify");
 // The full India Post PIN code directory (~148k post offices), bundled so
 // state/district area listings are instant and complete instead of relying
@@ -11,19 +10,6 @@ const PINCODE_DIRECTORY = require("../data/pincodeDirectory.json");
 
 function resolveBySlug(names, slug) {
   return names.find((name) => slugify(name) === slug) || null;
-}
-
-const AREA_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const cityAreasCache = new Map();
-const CITY_SAMPLE_SIZE = 150;
-async function getCachedAreas(cache, key, prefixes, sampleSize) {
-  const cached = cache.get(key);
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.data;
-  }
-  const areas = await scanAreas({ prefixes, sampleSize });
-  cache.set(key, { data: areas, expiresAt: Date.now() + AREA_CACHE_TTL_MS });
-  return areas;
 }
 
 async function getOverallStats(req, res, next) {
@@ -288,63 +274,6 @@ async function getPincodeTrend(req, res, next) {
   }
 }
 
-async function listCities(req, res, next) {
-  try {
-    const cities = await Promise.all(
-      Object.keys(CITY_PREFIXES).map(async (city) => {
-        const activeCount = await Report.countDocuments({
-          status: { $in: ["reported", "ongoing"] },
-          pincode: pincodeRegexForCity(city),
-        });
-        return { city, slug: slugify(city), activeCount };
-      })
-    );
-    res.json({ cities });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getCityDetail(req, res, next) {
-  try {
-    const { slug } = req.params;
-    const city = resolveBySlug(Object.keys(CITY_PREFIXES), slug);
-    const regex = city ? pincodeRegexForCity(city) : null;
-    if (!regex) {
-      return res.status(404).json({ message: "Unknown city" });
-    }
-
-    const reports = await Report.find({ pincode: regex }).sort({ createdAt: -1 }).limit(100);
-
-    const pincodeCounts = await Report.aggregate([
-      { $match: { pincode: regex, status: { $in: ["reported", "ongoing"] } } },
-      { $group: { _id: "$pincode", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 20 },
-      { $project: { _id: 0, pincode: "$_id", count: 1 } },
-    ]);
-
-    const rawAreas = await getCachedAreas(cityAreasCache, slug, CITY_PREFIXES[city], CITY_SAMPLE_SIZE);
-    const areas = await withActiveStatus(rawAreas);
-
-    res.json({ city, slug, reports, pincodeCounts, areas });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function warmCityCache() {
-  for (const city of Object.keys(CITY_PREFIXES)) {
-    const slug = slugify(city);
-    try {
-      await getCachedAreas(cityAreasCache, slug, CITY_PREFIXES[city], CITY_SAMPLE_SIZE);
-      console.log(`[warm] cached areas for city: ${city}`);
-    } catch (err) {
-      console.error(`[warm] failed for city ${city}:`, err.message);
-    }
-  }
-}
-
 module.exports = {
   getOverallStats,
   listStates,
@@ -352,7 +281,4 @@ module.exports = {
   getStateDistrictDetail,
   getPincodeScore,
   getPincodeTrend,
-  listCities,
-  getCityDetail,
-  warmCityCache,
 };

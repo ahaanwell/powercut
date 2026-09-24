@@ -4,11 +4,11 @@ import { BoltIcon, ChartBarIcon, MessageIcon, SearchIcon } from "./icons";
 const COVERAGE_FAQS = [
   {
     q: "Is my rural or small-town PIN code covered?",
-    a: "Yes. Every valid 6-digit Indian PIN code can be searched, reported on, and tracked — coverage isn't limited to the cities and districts featured in the directories.",
+    a: "Yes. Every valid 6-digit Indian PIN code can be searched, reported on, and tracked — coverage isn't limited to the districts featured in the directories.",
   },
   {
-    q: "Why are only a handful of cities and districts listed as directories?",
-    a: "The city and district directory pages are a curated shortlist of major metros to make browsing easier — they're a navigation convenience, not the limit of what's trackable. Any other PIN code works exactly the same through direct search.",
+    q: "Why are only a handful of districts listed as directories?",
+    a: "The district directory pages are a curated shortlist of major metros to make browsing easier — they're a navigation convenience, not the limit of what's trackable. Any other PIN code works exactly the same through direct search.",
   },
   {
     q: "How can I help improve coverage in my area?",
@@ -85,7 +85,7 @@ export default function CoveragePageContent() {
 
       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="text-lg font-extrabold text-blue-950">
-          State, City &amp; District Directories Explained
+          State &amp; District Directories Explained
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-zinc-600">
           Beyond searching a single PIN code, PowerCut organizes coverage into browsable
@@ -93,21 +93,17 @@ export default function CoveragePageContent() {
           <Link href="/states" className="font-medium text-blue-900 hover:underline">
             state and union territory
           </Link>{" "}
-          rolls up reports from all the PIN codes within it; a shortlist of major metros like{" "}
-          <Link href="/cities/mumbai" className="font-medium text-blue-900 hover:underline">
+          rolls up reports from all the PIN codes within it, and major metros like{" "}
+          <Link href="/district/mumbai" className="font-medium text-blue-900 hover:underline">
             Mumbai
           </Link>{" "}
           and{" "}
-          <Link href="/cities/delhi-ncr" className="font-medium text-blue-900 hover:underline">
-            Delhi NCR
-          </Link>{" "}
-          get dedicated city pages; and select metro areas also have{" "}
           <Link href="/district/new-delhi" className="font-medium text-blue-900 hover:underline">
-            district-level directories
+            New Delhi
           </Link>{" "}
-          listing every tracked locality by name. None of these are exhaustive — they&apos;re
-          navigation aids layered on top of the same underlying PIN-code data that covers the
-          entire country.
+          get dedicated district-level directories listing every tracked locality by name. None
+          of these are exhaustive — they&apos;re navigation aids layered on top of the same
+          underlying PIN-code data that covers the entire country.
         </p>
       </section>
 
