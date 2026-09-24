@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { useRef } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GridPoint } from "@/lib/types";
 import { ExpandIcon } from "./icons";
@@ -10,19 +10,6 @@ const INDIA_CENTER: [number, number] = [22.6, 80];
 
 function statusColor(status: GridPoint["status"]): string {
   return status === "restored" ? "#22c55e" : "#ef4444";
-}
-
-// Leaflet's attribution control shows its own "Leaflet" self-credit
-// alongside whatever the TileLayer sets — the "Leaflet |" prefix is just
-// library branding, not a license requirement, so it can be turned off.
-// The OpenStreetMap credit itself stays: their tile usage policy requires
-// visible attribution, so that part is never removed.
-function HideLeafletAttributionPrefix() {
-  const map = useMap();
-  useEffect(() => {
-    map.attributionControl.setPrefix(false);
-  }, [map]);
-  return null;
 }
 
 export default function LiveGridMapInner({ points }: { points: GridPoint[] }) {
@@ -43,11 +30,10 @@ export default function LiveGridMapInner({ points }: { points: GridPoint[] }) {
         center={INDIA_CENTER}
         zoom={4}
         scrollWheelZoom
+        attributionControl={false}
         style={{ height: "420px", width: "100%", background: "#0a0a0a" }}
       >
-        <HideLeafletAttributionPrefix />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           className="map-tiles-dark"
         />
