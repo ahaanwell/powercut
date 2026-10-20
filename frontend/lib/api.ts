@@ -80,6 +80,13 @@ export function getStateDetail(slug: string) {
   return apiFetch<StateDetail>(`/stats/states/${slug}`, { next: { revalidate: 60 } });
 }
 
+export function getStatePincodes(slug: string) {
+  return apiFetch<{ pincodes: { pincode: string; area: string }[] }>(
+    `/stats/states/${slug}/pincodes`,
+    { next: { revalidate: 3600 } }
+  );
+}
+
 export function getStateDistrictDetail(slug: string, districtSlug: string) {
   return apiFetch<StateDistrictDetail>(`/stats/states/${slug}/districts/${districtSlug}`, {
     next: { revalidate: 3600 },

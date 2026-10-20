@@ -123,6 +123,32 @@ async function getStateDetail(req, res, next) {
   }
 }
 
+async function getStatePincodes(req, res, next) {
+  try {
+    const { slug } = req.params;
+    const allStates = [...new Set(Object.values(PREFIX_STATE_MAP))];
+    const state = resolveBySlug(allStates, slug);
+    if (!state) {
+      return res.status(404).json({ message: "Unknown state" });
+    }
+
+    const stateDirectory = PINCODE_DIRECTORY[state] || {};
+    const seen = new Map();
+    for (const districtAreas of Object.values(stateDirectory)) {
+      for (const a of districtAreas) {
+        if (!seen.has(a.pincode)) seen.set(a.pincode, a.name);
+      }
+    }
+    const pincodes = [...seen.entries()]
+      .map(([pincode, area]) => ({ pincode, area }))
+      .sort((a, b) => a.pincode.localeCompare(b.pincode));
+
+    res.json({ state, slug, pincodes });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getStateDistrictDetail(req, res, next) {
   try {
     const { slug, districtSlug } = req.params;
@@ -278,6 +304,7 @@ module.exports = {
   getOverallStats,
   listStates,
   getStateDetail,
+  getStatePincodes,
   getStateDistrictDetail,
   getPincodeScore,
   getPincodeTrend,
